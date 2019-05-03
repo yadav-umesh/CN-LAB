@@ -1,42 +1,40 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.Socket;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.lang.*;
+import java.io.*;
+import java.net.*;
 
-public class TCP_Client {
-    static Timer timer=new Timer();
-    static Random random=new Random();
-    static int receiverinterval=3000,sendinterval;
-    public static void main(String args[]) throws IOException, InterruptedException {
-        Socket s = new Socket("localhost", 5000);
-        DataInputStream din = new DataInputStream(s.getInputStream());
-        DataOutputStream dout=new DataOutputStream(s.getOutputStream());
-        sendinterval=din.read();
-        dout.write(receiverinterval);
-        while (true ) {
-            if(sendinterval>receiverinterval){
-                Thread.sleep(sendinterval-receiverinterval);
-            }
+class TCP_Client {
+   public static void main(String args[]) throws IOException {
+	   int receive_interval=100;
+	   
+         Socket skt = new Socket("localhost", 8080);
+         DataInputStream dis=new DataInputStream(skt.getInputStream());
+         try {
+         BufferedReader in = new BufferedReader(new InputStreamReader(skt.getInputStream()));
+         System.out.println("server IP Address and port is:"+skt.getInetAddress()+"/"+skt.getPort());
+         System.out.print("Received string is:");
+         while (!in.ready()) {}
+         System.out.println(in.readLine()); // Read one line and output it
+         System.out.print("\n");
+         in.close();
+      }
+      catch(Exception e) 
+      {
+         System.out.print("It didn't work!\n");
+      }
+      while(true)
+      { DataInputStream dis1=new DataInputStream(skt.getInputStream());
+    	 final long start=System.currentTimeMillis();
+    	 dis.readUTF();
+    	 final long end=System.currentTimeMillis();
 
-            timer.schedule(new TimerTask() {
-                @Override
-                public void run() {
-                    try {
-                        String msg = din.readUTF();
-                        System.out.println("received " + msg);
-                        //timer.cancel();
-                    }
-                    catch (Exception e) {
-                        //e.printStackTrace();
-                    }
-
-                }
-            }, 5000);
-
-
-        }
-    }
+      if(receive_interval>(end-start))
+      {
+   	   try {
+   	      Thread.sleep(100);   
+           }
+      catch(Exception e) {}
+     }
+   }
+   }
 }
+

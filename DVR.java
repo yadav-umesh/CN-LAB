@@ -1,70 +1,140 @@
-import java.util.Scanner;
+import java.io.*;
+public class DVR 
+{
+	static int graph[][];
+	static int via[][];
+	static int rt[][];
+	static int v;
+	static int e;
 
-public class DVR {
-    public static void main(String args[]){
-        System.out.println("Enter no of routers \t");
-        Scanner sc=new Scanner(System.in);
-        int n=sc.nextInt();
-        int adj[][] = new int[n][n];
-        System.out.println("Enter undirected weighted adjacency matrix");
-        for(int i=0;i<n;i++){
-            for(int j=0;j<n;j++){
-                String input = sc.next();
-                if(input.equals("INF"))  adj[i][j] = 99999999;
-                else adj[i][j] = Integer.parseInt(input);
-            }
-        }
-        int routing_table[][][]=new int[n][n][3];
-        int previous[][] = new int[n][n];
-        for(int i=0;i<n;i++){
-            for(int j=0;j<n;j++) {
-                routing_table[i][j][0] = j;
-                routing_table[i][j][1] = adj[i][j];
-                previous[i][j] = adj[i][j];
-                if(adj[i][j]!=99999999)
-                    routing_table[i][j][2] = j;
-                else
-                    routing_table[i][j][2] = -1;
-            }
-        }
-        for(int a0=0;a0<n-2;a0++){
-            for(int i=0;i<n;i++){
-                for(int j=0;j<n;j++){
-                    if(i==j){
-                        routing_table[i][j][1] = 0;
-                        routing_table[i][j][2] = i;
-                        continue;
-                    }
-                    int min_index=-1;
-                    int min=99999999;
-                    for(int k=0;k<n;k++){
-                        if(i==k) continue;
-                        if(adj[i][k]==99999999) continue;
-                        if(min>adj[i][k]+previous[k][j]) {
-                            min = adj[i][k] + previous[k][j];
-                            min_index = k;
-                        }
-                    }
-                    routing_table[i][j][1] = min;
-                    routing_table[i][j][2] = min_index;
-                }
-            }
-            for(int i=0;i<n;i++){
-                for(int j=0;j<n;j++){
-                    previous[i][j]=routing_table[i][j][1];
-                }
-            }
-        }
-        System.out.println("The following are the routing tables at each node");
-        for(int i=0;i<n;i++){
-            System.out.println("Routing table at \t"+(char)(i+65)+" :");
-            System.out.println("Destination\tDistance\tNext Hop");
-            for(int j=0;j<n;j++){
-                System.out.println("\t"+(char)(routing_table[i][j][0]+65)
-                        +"\t\t\t"+routing_table[i][j][1]
-                        +"\t\t\t"+(char)(routing_table[i][j][2]+65));
-            }
-            System.out.println("\n\n\n");
-        }
-    }
+	public static void main(String args[]) throws IOException
+	{
+		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+  
+		System.out.println("Please enter the number of Vertices: ");
+		v = Integer.parseInt(br.readLine());
+  
+		System.out.println("Please enter the number of Edges: ");
+		e = Integer.parseInt(br.readLine());
+  
+		graph = new int[v][v];
+		via = new int[v][v];
+		rt = new int[v][v];
+		for(int i = 0; i < v; i++)
+			for(int j = 0; j < v; j++)
+			{
+				if(i == j)
+					graph[i][j] = 0;
+				else
+					graph[i][j] = 9999;
+			}
+  
+		for(int i = 0; i < e; i++)
+		{
+			System.out.println("Please enter data for Edge " + (i + 1) + ":");
+			System.out.print("Source: ");
+			int s = Integer.parseInt(br.readLine());
+			s--;
+			System.out.print("Destination: ");
+			int d = Integer.parseInt(br.readLine());
+			d--;
+			System.out.print("Cost: ");
+			int c = Integer.parseInt(br.readLine());
+			graph[s][d] = c;
+			graph[d][s] = c;
+		}
+  
+		dvr_calc_disp("The initial Routing Tables are: ");
+  
+		System.out.print("Please enter the Source Node for the edge whose cost has changed: ");
+		int s = Integer.parseInt(br.readLine());
+		s--;
+		System.out.print("Please enter the Destination Node for the edge whose cost has changed: ");
+		int d = Integer.parseInt(br.readLine());
+		d--;
+		System.out.print("Please enter the new cost: ");
+		int c = Integer.parseInt(br.readLine());
+		graph[s][d] = c;
+		graph[d][s] = c;
+  
+		dvr_calc_disp("The new Routing Tables are: ");
+	}
+ 
+ static void dvr_calc_disp(String message)
+ 	{
+	 System.out.println();
+	 init_tables();
+	 update_tables();
+	 System.out.println(message);
+	 print_tables();
+	 System.out.println();
+ 	}
+ 
+ static void update_table(int source)
+ 	{
+	 for(int i = 0; i < v; i++)
+	 {
+		 if(graph[source][i] != 9999)
+		 {
+			 int dist = graph[source][i];
+			 for(int j = 0; j < v; j++)
+			 {
+				 int inter_dist = rt[i][j];
+				 if(via[i][j] == source)
+					 inter_dist = 9999;
+				 if(dist + inter_dist < rt[source][j])
+				 
+					 rt[source][j] = dist + inter_dist;
+					 via[source][j] = i;
+				 }
+			 }
+		 }
+	 }
+ 	
+ 
+ static void update_tables()
+ 	{
+	 int k = 0;
+	 for(int i = 0; i < 4*v; i++)
+	 {
+		 update_table(k);
+		 k++;
+		 if(k == v)
+			 k = 0;
+	 }
+ 	}
+ 
+ static void init_tables()
+ 	{
+	 for(int i = 0; i < v; i++)
+	 {
+		 for(int j = 0; j < v; j++)
+		 {
+			 if(i == j)
+			 {
+				 rt[i][j] = 0;
+				 via[i][j] = i;
+			 }
+			 else
+			 {
+				 rt[i][j] = 9999;
+				 via[i][j] = 100;
+			 }
+		 }
+	 }
+ 	}
+ 
+ static void print_tables()
+ 	{
+	 for(int i = 0; i < v; i++)
+	 {
+		 for(int j = 0; j < v; j++)
+		 {
+			 System.out.print("Dist: " + rt[i][j] + "    ");
+		 }
+		 System.out.println();
+	 }
+ 	}
+ 
 }
+

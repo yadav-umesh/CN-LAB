@@ -1,55 +1,44 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.lang.*;
+import java.io.*;
+import java.net.*;
+class TCP_Server {
+   public static void main(String args[]) throws IOException {
+	   String data = "disjointed. I like to see at least thf ";
+   try {
+         ServerSocket srvr = new ServerSocket(8080);
+         Socket skt = srvr.accept();
+         System.out.print("Server has connected!\n");
+         System.out.println("srvr.getInetAddress();:"+srvr.getInetAddress());
+         PrintWriter out = new PrintWriter(skt.getOutputStream(), true);
+         System.out.print("Sending string: '" + data + "'\n");
+         System.out.print(data);
+         out.close();
+         skt.close();
+         srvr.close();
+      }
+      catch(Exception e)
+      {
+         System.out.print(" It didn't work!\n");
+      }
+   ServerSocket srvr1 = new ServerSocket(8080);
+   Socket s = srvr1.accept();
+   String data1 = "disjointed. I like to see at least three or four lines to a paragraph, and as an indication, my longest ";
+   DataOutputStream dos = new DataOutputStream(s.getOutputStream()); 
+   int send_interval=100;
+   int ind=0;
+   while(true)
+   {
+ 	 final long start=System.currentTimeMillis();
+ 	 dos.writeUTF((ind++)+data+data);
+ 	 final long end=System.currentTimeMillis();
 
-public class TCP_Server {
-    static Timer timer=new Timer();
-    static Random rand=new Random();
-    static int sendinterval,receiverinterval;
-    public static void main(String args[]) throws IOException, InterruptedException {
-        ServerSocket ss = new ServerSocket(5000);
-        System.out.println("waiting for client");
-        Socket s = ss.accept();
-        sendinterval=5000;
-        System.out.println("connected to client having ip " + s.getInetAddress().getHostAddress());
-        System.out.println("client side port is " + s.getPort());
-        DataInputStream din = new DataInputStream(s.getInputStream());
-        DataOutputStream dout = new DataOutputStream(s.getOutputStream());
-        StringBuilder sb=new StringBuilder();
-        dout.write(sendinterval);
-        receiverinterval=din.read();
-
-        for(int i=0;i<1500;i++){
-            sb.append((char)rand.nextInt(26)+65);
-        }
-        String st=sb.toString();
-
-        while(true){
-            if(sendinterval<receiverinterval)
-                Thread.sleep(receiverinterval-sendinterval);
-            timer.schedule(new TimerTask() {
-
-                @Override
-                public void run()  {
-                    try {
-                        Thread.sleep(5000);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                    try {
-                        dout.writeUTF(st);
-                        System.out.println("sent"+st);
-                        //   timer.cancel();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }, 5000);
-
-        }}
+   if(send_interval<(end-start))
+   {
+	   try {
+	Thread.sleep(100);   
+   }
+   catch(Exception e) {}
+   }
+   }
+   }
 }
